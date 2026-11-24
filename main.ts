@@ -1,30 +1,30 @@
 // news-image-20261124 — entry runner.
 //
-// Runs generate.py and writes entry.png into the output directory, then
-// verifies the PNG. The grader runs this file as `node /bot/main.ts`
-// with the repository read-only at /bot and an empty writable /output.
-import { spawnSync } from "node:child_process";
+// Copies the prebuilt entry.png into the output directory and verifies it.
+// Pure Node, no external processes: the grader runs this file as
+// `node /bot/main.ts` in a Node-22-only sandbox (no network, read-only
+// /bot, an empty writable /output, MAKEFUN_OUTPUT_DIR=/output in the
+// environment). The image itself was drawn by generate.py (kept in the
+// repository as the source of the artwork) and is shipped here as a
+// static asset, so nothing needs to be executed at grade time.
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-// The grader gives us a writable /output; locally we write next to main.ts.
-const outDir = process.env.OUTPUT_DIR || (existsSync("/output") ? "/output" : here);
+
+// The grader gives us a writable /output through MAKEFUN_OUTPUT_DIR;
+// fall back to /output when it exists, otherwise write next to main.ts.
+const outDir =
+  process.env.MAKEFUN_OUTPUT_DIR || (existsSync("/output") ? "/output" : here);
 mkdirSync(outDir, { recursive: true });
 const outPath = join(outDir, "entry.png");
 
-const run = spawnSync("python3", [join(here, "generate.py"), outPath], { stdio: "inherit" });
-if (run.error) {
-  console.error(`failed to start python3: ${run.error.message}`);
-  process.exit(1);
-}
-if (run.status !== 0) {
-  console.error(`generate.py exited with status ${run.status}`);
-  process.exit(1);
-}
+// Copy the image the repository holds into the output directory.
+copyFileSync(join(here, "entry.png"), outPath);
 
+// Verify the written file: PNG signature, 1024x1024 dimensions, sha256.
 const png = readFileSync(outPath);
 const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 if (!png.subarray(0, 8).equals(signature)) {
