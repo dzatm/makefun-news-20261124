@@ -1,4 +1,4 @@
-// news-image-20261124 — entry runner (v2).
+// news-image-20261124 — entry runner (v3).
 //
 // Copies the prebuilt entry.png into the output directory and verifies it.
 // Pure Node, no external processes: the grader runs this file as
@@ -8,11 +8,12 @@
 // repository as the source of the artwork) and is shipped here as a
 // static asset, so nothing needs to be executed at grade time.
 //
-// v2 (revised 25 Nov 2026): entry.png is now a dense 34-story broadsheet
-// front page for Tuesday 24 November 2026 — a lead story, a markets
-// strip with a mini bar chart, and 33 short stories in three columns.
-// The runner's job is unchanged: copy the static asset, then verify the
-// PNG signature, the 1024x1024 size, and print the sha256.
+// v3 (rebuilt 26 Nov 2026): entry.png is a 38-story winner-template
+// front page for Tuesday 24 November 2026 — spec header, region chips,
+// UTC timeline, day-in-numbers strip, 13 illustrated feature cards,
+// 25 briefs, a world pin map, a date-check strip and a methodology
+// footer. The runner's job is unchanged: copy the static asset, then
+// verify the PNG signature, the 1024x1024 size, and print the sha256.
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -44,5 +45,5 @@ if (width !== 1024 || height !== 1024) {
   process.exit(1);
 }
 const sha256 = createHash("sha256").update(png).digest("hex");
-console.log(`entry.png (v2, 34 stories): ${png.length} bytes, ${width}x${height}, sha256=${sha256}`);
+console.log(`entry.png (v3, 38 stories): ${png.length} bytes, ${width}x${height}, sha256=${sha256}`);
 console.log(`OK ${outPath}`);
